@@ -23,7 +23,9 @@ body {
 
 h1, h2, h3 {
     color: #343a40;
-    font-weight: 600;
+    /* Una fuente más moderna y audaz para los títulos */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700; /* Un poco más de peso para destacar */
     letter-spacing: -0.5px;
 }
 
@@ -75,6 +77,43 @@ h2 {
 
 .search-button:hover {
     background-color: #029DFF;
+}
+
+/* --- Sección de Carga --- */
+.upload-section {
+    margin-top: 3em;
+    padding-top: 2em;
+    border-top: 1px solid #dee2e6;
+}
+
+.upload-section p {
+    color: #6c757d;
+    margin-top: -0.5em;
+    margin-bottom: 1.5em;
+}
+
+.upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.upload-form label {
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Estilo para el input de archivo */
+.upload-form input[type="file"]::file-selector-button {
+    padding: 10px 20px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 /* --- Contenedor para tabla responsiva --- */
@@ -135,4 +174,43 @@ h2 {
     word-break: break-all;
     margin-top: 1em;
     border: 1px solid #e9ecef;
+}
+
+/* --- Lista de Resultados de Documentos --- */
+.results-list {
+    margin-top: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+}
+
+.result-item {
+    padding: 1.5em;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: box-shadow 0.2s ease;
+}
+
+.result-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.result-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #006BE8;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    text-decoration: none;
+}
+
+.result-snippet {
+    color: #495057;
+    margin: 0.5em 0;
+}
+
+.result-score {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
