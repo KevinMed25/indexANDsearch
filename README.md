@@ -1,9 +1,6 @@
 # Motor de Búsqueda de Documentos con PHP y MySQL
 
-Este proyecto implementa una aplicación web que funciona como un motor de búsqueda de documentos de texto plano. Originalmente concebido para buscar en la base de datos Northwind, ha evolucionado a un sistema completo de Recuperación de Información (IR) con su propio índice y lógica de relevancia.
-
-
-La aplicación permite a los usuarios subir archivos de texto (`.txt`) y luego realizar búsquedas complejas sobre el contenido de todos los documentos subidos. Los resultados se presentan ordenados por relevancia, mostrando primero los documentos más importantes para la consulta del usuario.
+Este proyecto implementa una aplicación web que funciona como un motor de búsqueda de documentos de texto plano. La aplicación permite a los usuarios subir archivos de texto (`.txt`) y luego realizar búsquedas complejas sobre el contenido de todos los documentos subidos. Los resultados se presentan ordenados por relevancia, mostrando primero los documentos más importantes para la consulta del usuario.
 
 ## Explicación del Funcionamiento
 
@@ -38,24 +35,24 @@ Cuando un usuario realiza una consulta:
 
 1.  **Servidor**: Asegúrate de tener un entorno de servidor web como XAMPP con Apache y MySQL en funcionamiento.
 2.  **Base de Datos**:
-    *   Importa la base de datos `northwind.sql` en tu MySQL.
-    *   Ejecuta el script `ir_tables.sql` sobre la base de datos `northwind` para crear las tablas del motor de búsqueda (`documents`, `terms`, `postings`).
-3.  **Conexión**: Verifica que las credenciales en `db_connection.php` sean correctas para tu entorno.
-4.  **Directorio `uploads`**: El script creará automáticamente la carpeta `uploads/` la primera vez que subas un archivo. Asegúrate de que el servidor tenga permisos de escritura en el directorio del proyecto.
+    *   Importar la base de datos `northwind.sql` en tu MySQL.
+    *   Ejecutar el script `ir_tables.sql` sobre la base de datos `northwind` para crear las tablas del motor de búsqueda (`documents`, `terms`, `postings`).
+3.  **Conexión**: Verificar que las credenciales en `db_connection.php` sean correctas para el entorno de trabajo.
+4.  **Directorio `uploads`**: El script creará automáticamente la carpeta `uploads/` la primera vez que subas un archivo. Asegurarse de que el servidor tenga permisos de escritura en el directorio del proyecto.
 
 ### 2. Probar la Indexación
 
-1.  **Crea archivos de prueba**: Crea varios archivos `.txt` con contenido variado.
-2.  **Sube los archivos**: Usa el formulario "Indexar Nuevos Documentos" en la página principal para subirlos.
-3.  **Verifica la Base de Datos**: Con una herramienta como phpMyAdmin, revisa que las tablas `documents`, `terms` y `postings` se hayan poblado con la información de tus archivos.
-4.  **Prueba la re-indexación**: Modifica uno de los archivos y vuelve a subirlo. Verifica que los contadores en la tabla `terms` se actualicen correctamente.
+1.  **Crear archivos de prueba**: Crear varios archivos `.txt` con contenido variado.
+2.  **Subir los archivos**: Usar el formulario "Indexar Nuevos Documentos" en la página principal para subirlos.
+3.  **Verificar la Base de Datos**: Con una herramienta como phpMyAdmin, revisar que las tablas `documents`, `terms` y `postings` se hayan poblado con la información de los archivos subidos.
+4.  **Probar la re-indexación**: Modificar uno de los archivos y volver a subirlo. Verificar que los contadores en la tabla `terms` se actualicen correctamente.
 
 ### 3. Probar la Búsqueda y Relevancia
 
-1.  **Búsqueda Simple**: Busca un término que sepas que existe en tus documentos.
-2.  **Búsqueda Booleana**: Prueba combinaciones como `termino1 AND termino2`, `termino1 OR termino2` y `termino1 AND NOT termino2`.
-3.  **Funciones Especiales**: Prueba `CADENA("una frase exacta de tus documentos")` y `PATRON(parte_de_una_palabra)`.
+1.  **Búsqueda Simple**: Buscar un término que sepas que existe en tus documentos.
+2.  **Búsqueda Booleana**: Probar combinaciones como `termino1 AND termino2`, `termino1 OR termino2` y `termino1 AND NOT termino2`.
+3.  **Funciones Especiales**: Probar `CADENA("una frase exacta de tus documentos")` y `PATRON(parte_de_una_palabra)`.
 4.  **Prueba de Relevancia (TF-IDF)**:
-    *   Crea un documento donde un término se repita muchas veces (alta relevancia).
-    *   Crea otro documento donde el mismo término aparezca solo una vez en un texto largo (baja relevancia).
-    *   Busca ese término. El primer documento debería aparecer primero en los resultados con una puntuación más alta.
+    *   Crear un documento donde un término se repita muchas veces (alta relevancia).
+    *   Crear otro documento donde el mismo término aparezca solo una vez en un texto largo (baja relevancia).
+    *   Buscar ese término. El primer documento debería aparecer primero en los resultados con una puntuación más alta.
