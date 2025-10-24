@@ -32,7 +32,7 @@ Cuando un usuario realiza una consulta:
 3.  **Cálculo de Relevancia**: Para los documentos encontrados, se calcula una puntuación de relevancia utilizando el algoritmo **TF-IDF** (Term Frequency-Inverse Document Frequency).
 4.  **Presentación**: Los resultados se muestran al usuario ordenados de mayor a menor relevancia, junto con un fragmento del documento y su puntuación.
 
-## Gui de Uso
+## Guía de Uso
 
 ### 1. Configuración Inicial
 
