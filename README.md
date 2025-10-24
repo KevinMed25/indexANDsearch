@@ -33,7 +33,7 @@ Cuando un usuario realiza una consulta:
 
 ### 1. Configuración Inicial
 
-1.  **Servidor**: Asegúrate de tener un entorno de servidor web como XAMPP con Apache y MySQL en funcionamiento.
+1.  **Servidor**: Asegurarse de tener un entorno de servidor web como XAMPP con Apache y MySQL en funcionamiento.
 2.  **Base de Datos**:
     *   Importar la base de datos `northwind.sql` en tu MySQL.
     *   Ejecutar el script `ir_tables.sql` sobre la base de datos `northwind` para crear las tablas del motor de búsqueda (`documents`, `terms`, `postings`).
