@@ -6,7 +6,7 @@
  * Contiene funciones de utilidad compartidas por diferentes partes de la aplicación,
  * como la normalización y tokenización de texto.
  *
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 
 /**

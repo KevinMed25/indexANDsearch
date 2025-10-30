@@ -6,7 +6,7 @@
  * Contiene toda la lógica del motor de búsqueda. Implementa el algoritmo Shunting-yard
  * para procesar consultas booleanas, recupera documentos del índice invertido,
  * y calcula la relevancia de los resultados usando el modelo TF-IDF.
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 
 require_once 'utils.php';
@@ -200,12 +200,16 @@ function execute_search(array $tokens, $conn) {
  * @param array $doc_ids IDs de los documentos a puntuar.
  * @param array $query_terms Términos de la consulta.
  * @param mysqli $conn Conexión a la BD.
- * @return array Un array asociativo [doc_id => score].
+ * @return array Un array asociativo [doc_id => ['score' => tfidf_score, 'cosine_sim' => cosine_similarity]].
  */
 function calculate_tfidf_scores(array $doc_ids, array $query_terms, $conn) {
     if (empty($doc_ids) || empty($query_terms)) return [];
 
-    $scores = array_fill_keys($doc_ids, 0.0);
+    $ranked_docs = [];
+    foreach ($doc_ids as $id) {
+        $ranked_docs[$id] = ['score' => 0.0, 'cosine_sim' => 0.0];
+    }
+
     $total_docs_result = $conn->query("SELECT COUNT(doc_id) as total FROM documents");
     $N = $total_docs_result->fetch_assoc()['total'];
     if ($N == 0) return [];
@@ -216,7 +220,8 @@ function calculate_tfidf_scores(array $doc_ids, array $query_terms, $conn) {
     $term_placeholder = implode(',', array_fill(0, count($term_values), '?'));
     $term_types = str_repeat('s', count($term_values));
 
-    $sql = "SELECT p.doc_id, p.term_frequency_in_doc, d.total_terms, t.doc_frequency
+    // --- Cálculo de la puntuación TF-IDF y el producto punto (numerador del coseno) ---
+    $sql = "SELECT p.doc_id, p.term_frequency_in_doc, d.total_terms, t.doc_frequency, d.doc_magnitude, t.term_text
             FROM postings p
             JOIN terms t ON p.term_id = t.term_id
             JOIN documents d ON p.doc_id = d.doc_id
@@ -226,13 +231,53 @@ function calculate_tfidf_scores(array $doc_ids, array $query_terms, $conn) {
     $stmt->bind_param($doc_ids_types . $term_types, ...$doc_ids, ...$term_values);
     $stmt->execute();
     $result = $stmt->get_result();
+    
+    $doc_data = [];
+    $query_vector_tf = array_count_values($term_values);
+    $query_magnitude_sq = 0.0;
 
+    // Agrupar datos por documento para no perder información
     while ($row = $result->fetch_assoc()) {
-        $tf = $row['term_frequency_in_doc'] / $row['total_terms'];
-        $idf = log($N / $row['doc_frequency']);
-        $scores[$row['doc_id']] += $tf * $idf;
+        if (!isset($doc_data[$row['doc_id']])) {
+            $doc_data[$row['doc_id']] = ['terms' => [], 'doc_magnitude' => $row['doc_magnitude']];
+        }
+        $doc_data[$row['doc_id']]['terms'][$row['term_text']] = $row;
     }
 
-    return $scores;
+    // Calcular magnitud del vector de la consulta (denominador del coseno)
+    foreach ($query_vector_tf as $term => $freq) {
+        // Necesitamos el doc_frequency del término para el IDF de la consulta
+        $term_info_stmt = $conn->prepare("SELECT doc_frequency FROM terms WHERE term_text = ?");
+        $term_info_stmt->bind_param('s', $term);
+        $term_info_stmt->execute();
+        $term_info_res = $term_info_stmt->get_result()->fetch_assoc();
+        $df = $term_info_res['doc_frequency'] ?? 1; // Evitar división por cero si el término no existe
+
+        $tf_query = $freq / count($term_values);
+        $idf_query = log($N / $df);
+        $query_magnitude_sq += pow($tf_query * $idf_query, 2);
+    }
+    $query_magnitude = sqrt($query_magnitude_sq);
+
+    // Calcular puntuaciones finales
+    foreach ($doc_data as $doc_id => $data) {
+        $dot_product = 0.0; // Numerador del coseno
+
+        // Iteramos sobre los términos de la consulta que se encontraron en este documento
+        foreach ($data['terms'] as $term_text => $term_data) {
+            $tf_doc = $term_data['term_frequency_in_doc'] / $term_data['total_terms'];
+            $idf = log($N / $term_data['doc_frequency']);
+            $ranked_docs[$doc_id]['score'] += $tf_doc * $idf; // Puntuación para ranking
+
+            $tf_query = $query_vector_tf[$term_text] / count($term_values);
+            $dot_product += ($tf_doc * $idf) * ($tf_query * $idf);
+        }
+
+        if ($data['doc_magnitude'] > 0 && $query_magnitude > 0) {
+            $ranked_docs[$doc_id]['cosine_sim'] = $dot_product / ($data['doc_magnitude'] * $query_magnitude);
+        }
+    }
+
+    return $ranked_docs;
 }
 ?>

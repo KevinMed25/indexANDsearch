@@ -7,7 +7,7 @@
  * Valida los archivos, los mueve a la carpeta `uploads/` y luego invoca
  * al script `indexer.php` para que procese cada nuevo archivo y lo añada al índice.
  *
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 
 require_once 'db_connection.php';

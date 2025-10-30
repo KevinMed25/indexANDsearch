@@ -6,7 +6,7 @@
  * Responsable de analizar la cadena de consulta del usuario. Convierte la entrada
  * en lenguaje natural (con operadores y funciones) en una estructura de tokens que
  * el motor de búsqueda puede entender.
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 
 require_once 'utils.php';

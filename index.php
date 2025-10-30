@@ -7,7 +7,7 @@
  * Muestra el formulario de búsqueda y el de subida de archivos.
  * Orquesta el proceso de búsqueda: recibe la consulta, la pasa al parser y al motor de búsqueda,
  * y finalmente muestra los resultados ordenados por relevancia.
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 require_once 'db_connection.php';
 require_once 'parser.php';
@@ -48,7 +48,13 @@ if (!empty($query_string)) {
             $ranked_docs = calculate_tfidf_scores($doc_ids, $query_terms, $conn);
 
             // 4. Ordenar los documentos por puntuación de relevancia (descendente)
-            arsort($ranked_docs);
+            // Usamos uasort para ordenar el array por el 'score' descendente, manteniendo las claves (doc_id).
+            uasort($ranked_docs, function($a, $b) {
+                if ($a['score'] == $b['score']) {
+                    return 0;
+                }
+                return ($a['score'] < $b['score']) ? 1 : -1;
+            });
 
             // 5. Obtener la información de los documentos para mostrarla
             $doc_ids_ordered = array_keys($ranked_docs);
@@ -80,7 +86,8 @@ if (!empty($query_string)) {
                             'filename' => $docs_info[$id]['filename'],
                             'filepath' => 'uploads/' . rawurlencode($docs_info[$id]['filename']), // URL relativa segura
                             'snippet' => $docs_info[$id]['snippet'],
-                            'score' => $ranked_docs[$id]
+                            'score' => $ranked_docs[$id]['score'],
+                            'cosine_sim' => $ranked_docs[$id]['cosine_sim']
                         ];
                     }
                 }
@@ -135,7 +142,10 @@ if (!empty($query_string)) {
                                 <?php echo htmlspecialchars($doc['filename']); ?>
                             </a>
                             <p class="result-snippet"><?php echo htmlspecialchars($doc['snippet']); ?>...</p>
-                            <span class="result-score">Relevancia (TF-IDF): <?php echo number_format($doc['score'], 4); ?></span>
+                            <div class="scores">
+                                <span class="result-score">Relevancia (TF-IDF): <?php echo number_format($doc['score'], 4); ?></span>
+                                <span class="result-score coseno">Similitud Coseno: <?php echo number_format($doc['cosine_sim'], 4); ?></span>
+                            </div>
                         </div>
                     <?php endforeach; ?>
                 </div>

@@ -1,7 +1,9 @@
 -- ir_tables.sql
 -- Script para crear las tablas del sistema de Recuperación de Información (IR).
 
-USE `northwind`;
+-- Crea la base de datos si no existe y la selecciona.
+CREATE SCHEMA IF NOT EXISTS `search_engine_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `search_engine_db`;
 
 --
 -- Tabla para almacenar información sobre los documentos (archivos) cargados.
@@ -12,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `filepath` VARCHAR(512) NOT NULL,
   `snippet` VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `total_terms` INT(11) NOT NULL DEFAULT 0,
+  `doc_magnitude` DOUBLE NOT NULL DEFAULT 0 COMMENT 'Magnitud del vector del documento para el cálculo del coseno.',
   `uploaded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`doc_id`),
   UNIQUE KEY `idx_filename` (`filename`)

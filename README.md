@@ -2,7 +2,7 @@
 
 Este proyecto implementa una aplicación web que funciona como un motor de búsqueda de documentos de texto plano. La aplicación permite a los usuarios subir archivos de texto (`.txt`) y luego realizar búsquedas complejas sobre el contenido de todos los documentos subidos. Los resultados se presentan ordenados por relevancia, mostrando primero los documentos más importantes para la consulta del usuario.
 
-## Explicación del Funcionamiento
+## Funcionamiento
 
 El sistema se divide en dos procesos principales: **Indexación** y **Búsqueda**.
 
@@ -27,7 +27,7 @@ Cuando un usuario realiza una consulta:
 1.  **Análisis de la Consulta**: El `parser.php` analiza la cadena de búsqueda, reconociendo operadores (`AND`, `OR`, `NOT`) y funciones especiales como `CADENA("frase exacta")` y `PATRON(patrón)`.
 2.  **Ejecución Booleana**: El `search_engine.php` utiliza el **algoritmo Shunting-yard** para evaluar la lógica booleana de la consulta contra el índice invertido, obteniendo una lista de documentos que coinciden.
 3.  **Cálculo de Relevancia**: Para los documentos encontrados, se calcula una puntuación de relevancia utilizando el algoritmo **TF-IDF** (Term Frequency-Inverse Document Frequency).
-4.  **Presentación**: Los resultados se muestran al usuario ordenados de mayor a menor relevancia, junto con un fragmento del documento y su puntuación.
+4.  **Presentación**: Los resultados se muestran al usuario ordenados por relevancia (TF-IDF), junto con un fragmento del documento, la puntuación TF-IDF y el valor de la **Similitud del Coseno** con la consulta.
 
 ## Guía de Uso
 
@@ -35,8 +35,7 @@ Cuando un usuario realiza una consulta:
 
 1.  **Servidor**: Asegurarse de tener un entorno de servidor web como XAMPP con Apache y MySQL en funcionamiento.
 2.  **Base de Datos**:
-    *   Importar la base de datos `northwind.sql` en tu MySQL.
-    *   Ejecutar el script `ir_tables.sql` sobre la base de datos `northwind` para crear las tablas del motor de búsqueda (`documents`, `terms`, `postings`).
+    *   Importar el script `search_engine_db.sql` en tu gestor de MySQL (como phpMyAdmin). Este script creará automáticamente la base de datos `search_engine_db` y las tablas necesarias (`documents`, `terms`, `postings`).
 3.  **Conexión**: Verificar que las credenciales en `db_connection.php` sean correctas para el entorno de trabajo.
 4.  **Directorio `uploads`**: El script creará automáticamente la carpeta `uploads/` la primera vez que subas un archivo. Asegurarse de que el servidor tenga permisos de escritura en el directorio del proyecto.
 
@@ -49,7 +48,7 @@ Cuando un usuario realiza una consulta:
 
 ### 3. Probar la Búsqueda y Relevancia
 
-1.  **Búsqueda Simple**: Buscar un término que sepas que existe en tus documentos.
+1.  **Búsqueda Simple**: Buscar un término que si existe en los documentos cargados.
 2.  **Búsqueda Booleana**: Probar combinaciones como `termino1 AND termino2`, `termino1 OR termino2` y `termino1 AND NOT termino2`.
 3.  **Funciones Especiales**: Probar `CADENA("una frase exacta de tus documentos")` y `PATRON(parte_de_una_palabra)`.
 4.  **Prueba de Relevancia (TF-IDF)**:

@@ -6,7 +6,7 @@
  * Contiene la lógica principal para procesar archivos de texto y construir el índice invertido.
  * Lee un archivo, lo normaliza, y puebla las tablas `documents`, `terms` y `postings`
  * de manera transaccional para garantizar la integridad de los datos.
- * @package    NorthwindSearchEngine
+ * @package    DocumentSearchEngine
  */
 
 require_once 'utils.php';
@@ -76,17 +76,10 @@ function index_file($filepath, $conn) {
             return;
         }
 
-        // --- 3. Insertar el nuevo documento en la tabla `documents` ---
-        $snippet = mb_substr($content, 0, 250, 'UTF-8');
-        $stmt = $conn->prepare("INSERT INTO documents (filename, filepath, snippet, total_terms) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param('sssi', $filename, $filepath, $snippet, $total_terms_in_doc);
-        $stmt->execute();
-        $doc_id = $conn->insert_id;
-        $stmt->close();
-        echo "Documento insertado con ID: $doc_id\n";
-
         // --- 4. Calcular frecuencias y posiciones de términos ---
         $term_stats = [];
+        $doc_magnitude_sq = 0.0; // Suma de los cuadrados de los pesos (TF)
+
         foreach ($tokens as $position => $token) {
             if (!isset($term_stats[$token])) {
                 $term_stats[$token] = ['freq' => 0, 'pos' => []];
@@ -94,6 +87,22 @@ function index_file($filepath, $conn) {
             $term_stats[$token]['freq']++;
             $term_stats[$token]['pos'][] = $position;
         }
+
+        // Calcular la suma de los cuadrados de los TF
+        foreach ($term_stats as $term => $stats) {
+            $tf = $stats['freq'] / $total_terms_in_doc;
+            $doc_magnitude_sq += ($tf * $tf);
+        }
+        $doc_magnitude = sqrt($doc_magnitude_sq);
+
+        // --- 3. Insertar el nuevo documento en la tabla `documents` (movido aquí) ---
+        $snippet = mb_substr($content, 0, 250, 'UTF-8');
+        $stmt = $conn->prepare("INSERT INTO documents (filename, filepath, snippet, total_terms, doc_magnitude) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param('sssid', $filename, $filepath, $snippet, $total_terms_in_doc, $doc_magnitude);
+        $stmt->execute();
+        $doc_id = $conn->insert_id;
+        $stmt->close();
+        echo "Documento insertado con ID: $doc_id y Magnitud: $doc_magnitude\n";
 
         // --- 5. Actualizar tablas `terms` y `postings` ---
         foreach ($term_stats as $term => $stats) {
